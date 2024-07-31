@@ -1,19 +1,34 @@
-import React, { useState, useEffect, Suspense, lazy } from "react";
+import React, { useEffect, useState } from "react";
 import {
   useParams,
   Link,
-  Route,
   Routes,
+  Route,
   useNavigate,
   useLocation,
 } from "react-router-dom";
 import axios from "axios";
-import styles from "./MovieDetailsPage.modules.css";
+import styles from "./MovieDetailsPage.module.css";
+import MovieCast from "../../components/MovieCast/MovieCast";
+import MovieReviews from "../../components/MovieReviews/MovieReviews";
 
-const MovieCast = lazy(() => import("../../components/MovieCast/MovieCast"));
-const MovieReviews = lazy(() =>
-  import("../../components/MovieReviews/MovieReviews")
-);
+const fetchMovieDetails = async (movieId) => {
+  const url = `https://api.themoviedb.org/3/movie/${movieId}`;
+  const options = {
+    headers: {
+      Authorization:
+        "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5NGNkMjlkZjExYjI3NWNiNmI4ZDhlMWI0NTczNjc5NiIsIm5iZiI6MTcyMjQzNjU1MS45NDYxMSwic3ViIjoiNjZhYTE4YWM3MjMyZDFmMTMyY2QyY2U4Iiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.gcy0-AcHUdN51z2KLncLAcAX9KjgMRkhQtNPNZBKa-Y",
+    },
+  };
+
+  try {
+    const response = await axios.get(url, options);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching movie details:", error);
+    throw error;
+  }
+};
 
 const MovieDetailsPage = () => {
   const { movieId } = useParams();
@@ -22,49 +37,47 @@ const MovieDetailsPage = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const fetchMovieDetails = async () => {
-      const response = await axios.get(
-        "https://api.themoviedb.org/3/movie/${movieId",
-        {
-          headers: {
-            Authorization: "Bearer 94cd29df11b275cb6b8d8e1b45736796",
-          },
-        }
-      );
-      setMovie(response.data);
+    const getMovieDetails = async () => {
+      try {
+        const movieData = await fetchMovieDetails(movieId);
+        setMovie(movieData);
+      } catch (error) {
+        console.error("Failed to fetch movie details:", error);
+      }
     };
-    fetchMovieDetails();
+
+    getMovieDetails();
   }, [movieId]);
 
-  const goBack = () => {
-    navigate(location.state?.from || "/movie");
+  const handleGoBack = () => {
+    if (location.state && location.state.from) {
+      navigate(location.state.from);
+    } else {
+      navigate("/movies");
+    }
   };
 
-  if (!movie) return null;
+  if (!movie) {
+    return <p>Loading...</p>;
+  }
 
   return (
-    <div>
-      <button onClick={goBack}>Go Back</button>
-      <div>
+    <div className={styles.container}>
+      <button onClick={handleGoBack}>Go Back</button>
+      <div className={styles.details}>
         <img
           src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
           alt={movie.title}
         />
-        <div>
-          <h2>{movie.title}</h2>
-          <p>{movie.overview}</p>
-        </div>
       </div>
-      <nav>
-        <Link to="cast">Cast</Link>
-        <Link to="reviews">Reviews</Link>
-      </nav>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Routes>
-          <Route path="cast" element={<MovieCast />} />
-          <Route path="reviews" element={<MovieReviews />} />
-        </Routes>
-      </Suspense>
+      <h1>{movie.title}</h1>
+      <p>{movie.overview}</p>
+      <Link to="cast">Cast</Link>
+      <Link to="reviews">Reviews</Link>
+      <Routes>
+        <Route path="cast" element={<MovieCast />} />
+        <Route path="reviews" element={<MovieReviews />} />
+      </Routes>
     </div>
   );
 };

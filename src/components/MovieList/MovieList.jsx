@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import styles from "./MovieList.modules.css";
+import styles from "./MovieList.module.css";
 
 const MovieList = ({ movies }) => (
   <ul>
