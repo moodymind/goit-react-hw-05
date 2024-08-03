@@ -6,11 +6,11 @@ import {
   Route,
   useNavigate,
   useLocation,
+  NavLink,
+  Outlet,
 } from "react-router-dom";
 import axios from "axios";
 import styles from "./MovieDetailsPage.module.css";
-import MovieCast from "../../components/MovieCast/MovieCast";
-import MovieReviews from "../../components/MovieReviews/MovieReviews";
 
 const fetchMovieDetails = async (movieId) => {
   const url = `https://api.themoviedb.org/3/movie/${movieId}`;
@@ -73,12 +73,21 @@ const MovieDetailsPage = () => {
       </div>
       <h1>{movie.title}</h1>
       <p>{movie.overview}</p>
-      <Link to="cast">Cast</Link>
-      <Link to="reviews">Reviews</Link>
-      <Routes>
-        <Route path="cast" element={<MovieCast />} />
-        <Route path="reviews" element={<MovieReviews />} />
-      </Routes>
+      <nav>
+        <NavLink
+          to="cast"
+          className={({ isActive }) => (isActive ? styles.active : "")}
+        >
+          Cast
+        </NavLink>
+        <NavLink
+          to="reviews"
+          className={({ isActive }) => (isActive ? styles.active : "")}
+        >
+          Reviews
+        </NavLink>
+      </nav>
+      <Outlet />
     </div>
   );
 };
