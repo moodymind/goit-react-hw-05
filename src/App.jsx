@@ -1,12 +1,27 @@
-import React, { Suspense } from "react";
-import { Outlet } from "react-router-dom";
+import React, { Suspense, lazy } from "react";
+import { Routes, Route, Outlet } from "react-router-dom";
 import Navigation from "./components/Navigation/Navigation";
+import "./index.css";
+
+const HomePage = lazy(() => import("./pages/HomePage/HomePage.jsx"));
+const MoviesPage = lazy(() => import("./pages/MoviesPage/MoviesPage"));
+const MovieDetailsPage = lazy(() =>
+  import("./pages/MovieDetailsPage/MovieDetailsPage")
+);
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage/NotFoundPage"));
 
 const App = () => (
   <>
     <Navigation />
     <Suspense fallback={<div>Loading...</div>}>
-      <Outlet />
+      <Routes>
+        <Route path="/" element={<Outlet />}>
+          <Route index element={<HomePage />} />
+          <Route path="movies" element={<MoviesPage />} />
+          <Route path="movies/:movieId/*" element={<MovieDetailsPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
     </Suspense>
   </>
 );
